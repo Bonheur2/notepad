@@ -49,6 +49,8 @@ dependencies:
   speech_to_text: ^7.4.0
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
+  uuid: ^4.6.0
+  sqlite3_flutter_libs: ^0.5.42
 
 dev_dependencies:
   flutter_test:
