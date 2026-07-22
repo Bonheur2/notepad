@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "313180797580",
+    "project_id": "brukwaya-note",
+    "storage_bucket": "brukwaya-note.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313180797580:android:c0c566b1c23ab5b57559a9",
+        "android_client_info": {
+          "package_name": "com.yourcompany.notepad_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWJRgNmi0Q_TWHX2Xm6xNozgNNYq-1rY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
