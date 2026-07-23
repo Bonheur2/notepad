@@ -1,0 +1,3 @@
+# Filled in / overwritten by `shorebird init` after you run `shorebird login`.
+# See the "Shorebird OTA Updates" section in README.md for the full workflow.
+app_id: "REPLACE_WITH_YOUR_SHOREBIRD_APP_ID"
