@@ -15,6 +15,7 @@ extension NoteMapper on Note {
       updatedAt: updatedAt,
       version: Value(version),
       linkedTaskId: Value(linkedTaskId),
+      sketchPath: Value(sketchPath),
     );
   }
 }
@@ -32,6 +33,7 @@ extension NoteRowMapper on NoteRow {
       updatedAt: updatedAt,
       version: version,
       linkedTaskId: linkedTaskId,
+      sketchPath: sketchPath,
     );
   }
 }
