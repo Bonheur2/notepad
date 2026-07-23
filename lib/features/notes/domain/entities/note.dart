@@ -9,6 +9,7 @@ class Note {
   final DateTime updatedAt;
   final int version;
   final String? linkedTaskId;
+  final String? sketchPath;
 
   const Note({
     required this.id,
@@ -21,6 +22,7 @@ class Note {
     required this.updatedAt,
     required this.version,
     this.linkedTaskId,
+    this.sketchPath,
   });
 
   Note copyWith({
@@ -32,6 +34,7 @@ class Note {
     DateTime? updatedAt,
     int? version,
     String? linkedTaskId,
+    String? sketchPath,
   }) {
     return Note(
       id: id,
@@ -44,6 +47,7 @@ class Note {
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       linkedTaskId: linkedTaskId ?? this.linkedTaskId,
+      sketchPath: sketchPath ?? this.sketchPath,
     );
   }
 }
