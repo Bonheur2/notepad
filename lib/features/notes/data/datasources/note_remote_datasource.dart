@@ -21,6 +21,7 @@ class NoteRemoteDataSource {
       'updatedAt': note.updatedAt.toIso8601String(),
       'version': note.version,
       'linkedTaskId': note.linkedTaskId,
+      'sketchPath': note.sketchPath,
     });
   }
 
@@ -43,6 +44,7 @@ class NoteRemoteDataSource {
           updatedAt: DateTime.parse(data['updatedAt']),
           version: data['version'] ?? 1,
           linkedTaskId: data['linkedTaskId'],
+          sketchPath: data['sketchPath'],
         );
       }).toList();
     });
