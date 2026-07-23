@@ -18,6 +18,11 @@ class NoteRepository {
         );
   }
 
+  Future<Note?> getNoteById(String id) async {
+    final rows = await (db.select(db.notes)..where((t) => t.id.equals(id))).get();
+    return rows.isEmpty ? null : rows.first.toDomain();
+  }
+
   Future<void> upsertNote(Note note) {
     return db.into(db.notes).insertOnConflictUpdate(note.toCompanion());
   }
