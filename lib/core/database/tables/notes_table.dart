@@ -12,6 +12,7 @@ class Notes extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   IntColumn get version => integer().withDefault(const Constant(1))();
   TextColumn get linkedTaskId => text().nullable()();
+  TextColumn get sketchPath => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
