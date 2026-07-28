@@ -140,8 +140,15 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
             child: Row(
               children: [
                 for (final color in [Colors.black, Colors.red, Colors.blue, Colors.green])

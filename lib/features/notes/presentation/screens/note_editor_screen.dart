@@ -394,30 +394,31 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_isEncrypted)
               Container(
-                margin: const EdgeInsets.only(bottom: 8),
+                margin: const EdgeInsets.only(bottom: 12),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.lock,
-                        size: 14,
+                        size: 15,
                         color:
                             Theme.of(context).colorScheme.onPrimaryContainer),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Text(
                       'This note is encrypted on this device',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
                     ),
@@ -426,63 +427,99 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               ),
             TextField(
               controller: _titleController,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
               decoration: const InputDecoration(
                 hintText: 'Title',
                 border: InputBorder.none,
+                filled: false,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
               ),
             ),
-            TextField(
-              controller: _categoryController,
-              style: Theme.of(context).textTheme.bodySmall,
-              decoration: const InputDecoration(
-                hintText: 'Category (e.g. Work, Personal, Ideas)',
-                prefixIcon: Icon(Icons.folder_outlined, size: 18),
-                border: InputBorder.none,
-              ),
-            ),
-            TextField(
-              controller: _tagsController,
-              style: Theme.of(context).textTheme.bodySmall,
-              decoration: const InputDecoration(
-                hintText: 'Tags, comma separated (e.g. urgent, recipe)',
-                prefixIcon: Icon(Icons.label_outline, size: 18),
-                border: InputBorder.none,
-              ),
-            ),
-            InkWell(
-              onTap: _pickReminder,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.alarm, size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      _reminderAt == null
-                          ? 'Set reminder'
-                          : 'Reminder: ${_reminderAt!.toLocal()}'
-                              .split('.')
-                              .first,
-                      style: Theme.of(context).textTheme.bodySmall,
+            const SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _categoryController,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    decoration: const InputDecoration(
+                      hintText: 'Category',
+                      prefixIcon: Icon(Icons.folder_outlined, size: 17),
+                      border: InputBorder.none,
+                      filled: false,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
                     ),
-                    if (_reminderAt != null)
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 16),
-                        tooltip: 'Clear reminder',
-                        onPressed: () => setState(() => _reminderAt = null),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _tagsController,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    decoration: const InputDecoration(
+                      hintText: 'Tags, comma separated',
+                      prefixIcon: Icon(Icons.label_outline, size: 17),
+                      border: InputBorder.none,
+                      filled: false,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ActionChip(
+                  avatar: Icon(
+                    Icons.alarm,
+                    size: 16,
+                    color: _reminderAt != null
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : null,
+                  ),
+                  label: Text(
+                    _reminderAt == null
+                        ? 'Set reminder'
+                        : '${_reminderAt!.toLocal()}'.split('.').first,
+                  ),
+                  backgroundColor: _reminderAt != null
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null,
+                  labelStyle: _reminderAt != null
+                      ? TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w500,
+                        )
+                      : null,
+                  onPressed: _pickReminder,
+                ),
+                if (_reminderAt != null)
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16),
+                    tooltip: 'Clear reminder',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => setState(() => _reminderAt = null),
+                  ),
+              ],
             ),
             if (_sketchPath != null)
               Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(top: 12),
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(14),
                       child: Image.file(
                         File(_sketchPath!),
                         height: 120,
@@ -490,9 +527,19 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         fit: BoxFit.cover,
                       ),
                     ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                        ),
+                      ),
+                    ),
                     Positioned(
-                      top: 4,
-                      right: 4,
+                      top: 6,
+                      right: 6,
                       child: IconButton(
                         icon: const Icon(Icons.close, size: 18),
                         tooltip: 'Remove sketch',
@@ -505,16 +552,21 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                   ],
                 ),
               ),
-            const Divider(),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 4),
             Expanded(
               child: TextField(
                 controller: _contentController,
                 maxLines: null,
                 expands: true,
                 textAlignVertical: TextAlignVertical.top,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
                 decoration: const InputDecoration(
                   hintText: 'Start writing...',
                   border: InputBorder.none,
+                  filled: false,
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
             ),

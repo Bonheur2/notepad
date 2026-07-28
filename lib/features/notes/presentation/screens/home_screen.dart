@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/providers/core_providers.dart';
 import '../../../../app/providers/note_providers.dart';
 import '../../../../app/providers/sync_providers.dart';
+import '../../../../app/widgets/empty_state.dart';
 import '../../domain/entities/note.dart';
 import 'note_editor_screen.dart';
 
@@ -81,27 +82,77 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         filtered = filtered.where(_matchesSearch).where(_matchesTag).toList();
 
         if (filtered.isEmpty) {
-          return const Center(child: Text('No matching notes.'));
+          return EmptyState(
+            icon: Icons.notes_outlined,
+            message: allNotes.isEmpty
+                ? 'No notes yet — tap + to create one.'
+                : 'No matching notes.',
+          );
         }
 
-        return ListView.builder(
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
           itemCount: filtered.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final n = filtered[index];
             final selected = isWide && !_showNewNoteInPanel && _selectedNoteId == n.id;
-            return ListTile(
-              selected: selected,
-              title: Text(n.title),
-              subtitle: Text(
-                n.isEncrypted ? '🔒 Encrypted note' : n.contentMarkdown,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            final colorScheme = Theme.of(context).colorScheme;
+            return Card(
+              color: selected ? colorScheme.primaryContainer.withValues(alpha: 0.4) : null,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => _openNote(n, isWide: isWide),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              n.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                if (n.isEncrypted)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: Icon(Icons.lock,
+                                        size: 13, color: colorScheme.onSurfaceVariant),
+                                  ),
+                                Expanded(
+                                  child: Text(
+                                    n.isEncrypted ? 'Encrypted note' : n.contentMarkdown,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Chip(
+                        label: Text(n.category),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              trailing: Chip(
-                label: Text(n.category, style: const TextStyle(fontSize: 10)),
-                padding: EdgeInsets.zero,
-              ),
-              onTap: () => _openNote(n, isWide: isWide),
             );
           },
         );
@@ -259,17 +310,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         _showNewNoteInPanel = false;
                                       }),
                                     )
-                                  : const Center(
-                                      child: Text('Select a note or create a new one'),
+                                  : const EmptyState(
+                                      icon: Icons.edit_note,
+                                      message: 'Select a note or create a new one',
                                     ),
                             ),
                           ],
                         )
                       : _buildTabBarView(tabs, allNotes, isWide),
-                  floatingActionButton: FloatingActionButton(
+                  floatingActionButton: FloatingActionButton.extended(
                     onPressed: () => _openNote(null, isWide: isWide),
                     tooltip: 'New note',
-                    child: const Icon(Icons.add),
+                    icon: const Icon(Icons.add),
+                    label: const Text('New note'),
                   ),
                 ),
               ),
