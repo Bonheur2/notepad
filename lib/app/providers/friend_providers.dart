@@ -10,19 +10,22 @@ final friendRepositoryProvider = Provider<FriendRepository?>((ref) {
   return FriendRepository(user.uid);
 });
 
-final incomingFriendRequestsProvider = StreamProvider<List<FriendRequest>>((ref) {
+// autoDispose: see chat_providers.dart — a Firestore listener that errors
+// once never reconnects on its own, so these dispose when unwatched to force
+// a fresh listener next time the screen is opened.
+final incomingFriendRequestsProvider = StreamProvider.autoDispose<List<FriendRequest>>((ref) {
   final repo = ref.watch(friendRepositoryProvider);
   if (repo == null) return const Stream.empty();
   return repo.watchIncoming();
 });
 
-final outgoingFriendRequestsProvider = StreamProvider<List<FriendRequest>>((ref) {
+final outgoingFriendRequestsProvider = StreamProvider.autoDispose<List<FriendRequest>>((ref) {
   final repo = ref.watch(friendRepositoryProvider);
   if (repo == null) return const Stream.empty();
   return repo.watchOutgoing();
 });
 
-final friendsProvider = StreamProvider<List<Friend>>((ref) {
+final friendsProvider = StreamProvider.autoDispose<List<Friend>>((ref) {
   final repo = ref.watch(friendRepositoryProvider);
   if (repo == null) return const Stream.empty();
   return repo.watchFriends();

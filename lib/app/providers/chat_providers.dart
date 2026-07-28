@@ -10,13 +10,18 @@ final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
   return ChatRepository(user.uid);
 });
 
-final chatListProvider = StreamProvider<List<ChatSummary>>((ref) {
+// autoDispose: a Firestore listener that errors (e.g. a transient
+// permission-denied) dies permanently and never reconnects on its own.
+// Disposing when the screen is no longer watched forces a fresh listener
+// next time it's opened, instead of getting stuck reusing a dead one.
+final chatListProvider = StreamProvider.autoDispose<List<ChatSummary>>((ref) {
   final repo = ref.watch(chatRepositoryProvider);
   if (repo == null) return const Stream.empty();
   return repo.watchChats();
 });
 
-final chatMessagesProvider = StreamProvider.family<List<ChatMessage>, String>((ref, chatId) {
+final chatMessagesProvider =
+    StreamProvider.autoDispose.family<List<ChatMessage>, String>((ref, chatId) {
   final repo = ref.watch(chatRepositoryProvider);
   if (repo == null) return const Stream.empty();
   return repo.watchMessages(chatId);
