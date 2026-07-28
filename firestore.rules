@@ -32,11 +32,17 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.auth.uid in request.resource.data.participants;
 
+      // Each message denormalizes `participants` onto itself rather than
+      // relying on get()-ing the parent chat doc: on the first message of a
+      // brand-new chat, the chat doc and the message are created in the same
+      // batch, and rules evaluate each write against the pre-batch state — a
+      // get() here would see the parent doc as not-yet-existing and deny the
+      // write. Checking the message's own resource data avoids that entirely.
       match /messages/{messageId} {
         allow read: if request.auth != null &&
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+          request.auth.uid in resource.data.participants;
         allow create: if request.auth != null &&
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants &&
+          request.auth.uid in request.resource.data.participants &&
           request.resource.data.senderId == request.auth.uid;
       }
     }

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/providers/core_providers.dart';
-import '../../domain/entities/user_profile.dart';
+import '../../../../app/providers/sync_providers.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
@@ -41,7 +41,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   }
 
   Future<void> _createAccount() async {
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
     if (email.isEmpty || password.isEmpty) {
       setState(() => _error = 'Enter an email and password.');
@@ -77,19 +77,67 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         }
       }
 
-      await ref.read(userProfileRepositoryProvider).upsertProfile(
-            UserProfile(
-              uid: user.uid,
-              email: user.email ?? email,
-              displayName: email.split('@').first,
-              createdAt: DateTime.now(),
-            ),
+      await ref.read(userProfileRepositoryProvider).ensureProfile(
+            uid: user.uid,
+            email: user.email ?? email,
+            displayName: email.split('@').first,
           );
     } on FirebaseAuthException catch (e) {
       if (mounted) setState(() => _error = _mapAuthError(e));
+    } catch (e) {
+      // Auth succeeded but the profile write failed (e.g. Firestore rules not
+      // deployed yet) — surface it instead of silently swallowing it, since
+      // the account would otherwise be unfindable by email.
+      if (mounted) {
+        setState(() => _error = 'Signed in, but saving your profile failed: $e');
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  bool _profileChecked = false;
+
+  void _ensureProfileForSignedInUser(User user) {
+    if (_profileChecked) return;
+    _profileChecked = true;
+    final email = user.email;
+    if (email == null || email.isEmpty) return;
+    Future.microtask(() => ref.read(userProfileRepositoryProvider).ensureProfile(
+          uid: user.uid,
+          email: email,
+          displayName: email.split('@').first,
+        ));
+  }
+
+  Future<void> _signOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign out?'),
+        content: const Text(
+          'You\'ll be switched to a fresh anonymous session. Notes on this '
+          'device stay put, but new notes will sync under the new session '
+          'instead of this account until you sign in again.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final authService = ref.read(authServiceProvider);
+    await authService.signOut();
+    await authService.ensureSignedIn();
+    ref.invalidate(syncEngineProvider);
   }
 
   @override
@@ -106,6 +154,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           final email = user?.email;
 
           if (!isAnonymous && email != null && email.isNotEmpty) {
+            _ensureProfileForSignedInUser(user!);
             return Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -118,6 +167,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   Text(
                     'Friends can find you by this email address.',
                     style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 24),
+                  OutlinedButton(
+                    onPressed: _signOut,
+                    child: const Text('Sign out'),
                   ),
                 ],
               ),

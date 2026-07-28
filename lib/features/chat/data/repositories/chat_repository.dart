@@ -63,6 +63,7 @@ class ChatRepository {
       'senderId': uid,
       'text': text,
       'sentAt': now,
+      'participants': participants,
     });
 
     batch.set(

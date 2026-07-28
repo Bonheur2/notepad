@@ -44,11 +44,12 @@ class _ChatHomeScreenState extends ConsumerState<ChatHomeScreen> {
     );
 
     if (email == null || email.isEmpty || !mounted) return;
+    final normalizedEmail = email.toLowerCase();
 
     final friendRepo = ref.read(friendRepositoryProvider);
     if (friendRepo == null) return;
 
-    final found = await friendRepo.findUserByEmail(email);
+    final found = await friendRepo.findUserByEmail(normalizedEmail);
     if (!mounted) return;
 
     if (found == null) {

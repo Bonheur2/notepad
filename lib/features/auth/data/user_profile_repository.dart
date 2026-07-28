@@ -15,6 +15,29 @@ class UserProfileRepository {
     }, SetOptions(merge: true));
   }
 
+  Future<void> ensureProfile({
+    required String uid,
+    required String email,
+    required String displayName,
+  }) async {
+    final existing = await getProfile(uid);
+    if (existing == null) {
+      await upsertProfile(UserProfile(
+        uid: uid,
+        email: email,
+        displayName: displayName,
+        createdAt: DateTime.now(),
+      ));
+    } else {
+      // Merge without touching createdAt, so re-checks on later visits don't
+      // overwrite the original creation time.
+      await _usersRef.doc(uid).set({
+        'email': email,
+        'displayName': displayName,
+      }, SetOptions(merge: true));
+    }
+  }
+
   Future<UserProfile?> getProfile(String uid) async {
     final doc = await _usersRef.doc(uid).get();
     if (!doc.exists) return null;
