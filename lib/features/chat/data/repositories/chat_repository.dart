@@ -34,9 +34,16 @@ class ChatRepository {
   }
 
   Stream<List<ChatMessage>> watchMessages(String chatId) {
+    // The `where` clause here isn't just an optimization: Firestore rejects
+    // a `list` query outright unless the query itself can prove (from its
+    // shape) that every possible result satisfies the security rule. The
+    // rule checks `resource.data.participants`, so the query needs a
+    // matching `arrayContains` filter or Firestore denies the whole listen,
+    // even though every actual document would individually pass the rule.
     return _chatsRef
         .doc(chatId)
         .collection('messages')
+        .where('participants', arrayContains: uid)
         .orderBy('sentAt')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
